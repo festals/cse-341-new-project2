@@ -5,10 +5,9 @@
     "description": "Members and Users API",
     "version": "1.0.0"
   },
-  "host": "localhost:3001",
+  "host": "cse-341-new-project2.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http",
     "https"
   ],
   "paths": {
