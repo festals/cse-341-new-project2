@@ -1,5 +1,6 @@
 const mongodb = require('../data/database');
 const ObjectId = require('mongodb').ObjectId;
+const bcrypt = require('bcryptjs');
 
 const getAll = async (req, res) => {
     //#swagger.tags=['Users']
@@ -34,10 +35,11 @@ const getSingle = async (req, res) => {
 const createUser = async(req, res) => {
     //#swagger.tags=['Users']
     try {
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = {
         email: req.body.email,
         username: req.body.username,
-        password: req.body.password,
+        password: hashedPassword,
     };
 
     const response = await mongodb.getDatabase().db('project2').collection('users').insertOne(user);
@@ -55,10 +57,11 @@ const createUser = async(req, res) => {
 const updateUser = async(req, res) => {
     //#swagger.tags=['Users']
     const userId = new ObjectId(req.params.id);
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = {
         email: req.body.email,
         username: req.body.username,
-        password: req.body.password,
+        password: hashedPassword,
     };
 
     const response = await mongodb.getDatabase().db('project2').collection('users').replaceOne({_id: userId}, user);
