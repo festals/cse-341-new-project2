@@ -1,5 +1,5 @@
 const express = require('express');
-const mongodb = require('./data/database');
+const connectDB = require('./data/database');
 const bodyParser = require('body-parser');
 const passport = require('passport');
 const session = require('express-session');
@@ -7,6 +7,7 @@ const GithubStrategy = require('passport-github2').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
 const cors = require('cors');
 const app = express();
+const { User } = require('./models/users');
 const bcrypt = require('bcryptjs');
 
 
@@ -134,11 +135,10 @@ process.on('uncaughtException', (err, origin) => {
     console.error(`Caught Exception: ${err}\nException Origin: ${origin}`);
 });
 
-mongodb.initDb((err) => {
-    if(err) {
-        console.error("MongoDB connection error:", err);
-    }
-    else {
-        app.listen(port, () =>{console.log(`Database is listening and node Running on port ${port}`)});
-    }
+connectDB().then(() => {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    });
+}).catch((error) => {
+    console.error("MongoDB connection error:", error);
 });

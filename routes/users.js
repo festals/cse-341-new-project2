@@ -9,7 +9,7 @@ router.get('/',  isAuthenticated, usersController.getAll);
 
 router.get('/:id', isAuthenticated, usersController.getSingle);
 
-router.post('/', userValidationRules(), validate, usersController.createUser);
+router.post('/', isAuthenticated, userValidationRules(), validate, usersController.createUser);
 
 router.put('/:id', isAuthenticated, userValidationRules(), validate, usersController.updateUser);
 

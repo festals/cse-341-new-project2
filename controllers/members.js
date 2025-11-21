@@ -1,4 +1,4 @@
-const mongodb = require('../data/database');
+const {Member} = require('../models/members');
 const ObjectId = require('mongodb').ObjectId;
 
 const getAll = async (req, res) => {
@@ -7,26 +7,22 @@ const getAll = async (req, res) => {
     if (req.query.triggerError === 'true') {
       throw new Error('Artificial Error for demonstration');
     }
-    const result = await mongodb.getDatabase().db('project2').collection('members').find();
-    result.toArray().then((members) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json(members);
-    });
-    } catch (err) {
+    const lists = await Member.find();
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(lists);
+  } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
 const getSingle = async (req, res) => {
     //#swagger.tags=['Members']
-    try {
-    const itemId = new ObjectId(req.params.id);
-    const result = await mongodb.getDatabase().db('project2').collection('members').find({ _id:itemId });
-    result.toArray().then((members) => {
-        res.setHeader('Content-Type', 'application/json');
-        res.status(200).json(members[0]);
-    });
-    } catch (err) {
+ try {
+    const memberId = new ObjectId(req.params.id);
+    const lists = await Member.findById(memberId);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(lists);
+  } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
@@ -34,7 +30,7 @@ const getSingle = async (req, res) => {
 const createMember = async(req, res) => {
     //#swagger.tags=['Members']
     try {
-    const member = {
+    const member = new Member ({
         email: req.body.email,
         birthday: req.body.birthday,
         ward: req.body.ward,        
@@ -42,16 +38,16 @@ const createMember = async(req, res) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         memberNum: req.body.memberNum
-    };
+    });
 
-    const response = await mongodb.getDatabase().db('project2').collection('members').insertOne(member);
+      const response = await member.save();
 
-    if(response.acknowledged) {
-        res.status(204).send();
+    if (response) {
+      res.status(201).json(response);
     } else {
-        res.status(500).json(response.error || 'Some Error occurred while creating the member.')
-    };
-    } catch (error) {
+      res.status(500).json('Some error occurred while creating the member.');
+    }
+  } catch (error) {
     next(error);
   }
 };
@@ -69,19 +65,20 @@ const updateMember = async(req, res) => {
         memberNum: req.body.memberNum
     };
 
-    const response = await mongodb.getDatabase().db('project2').collection('members').replaceOne({_id: memberId}, member);
+   const response = await Member.findByIdAndUpdate(memberId, member, { new: true });
 
-    if(response.modifiedCount > 0) {
-        res.status(204).send();
-    } else {
-        res.status(500).json(response.error || 'Some Error occurred while updating the member.')
-    };
-}
+  if (response) {
+    res.status(200).json(response);
+  } else {
+    res.status(500).json('Some error occurred while updating the member.');
+  };
+};
+
 
 const deleteMember = async(req, res) => {
     //#swagger.tags=['Members']
     const memberId = new ObjectId(req.params.id);
-    const response = await mongodb.getDatabase().db('project2').collection('members').deleteOne({_id: memberId});
+    const response = await Member.findByIdAndDelete(memberId);
 
     if(response.deletedCount > 0) {
         res.status(204).send();
