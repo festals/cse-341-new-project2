@@ -52,7 +52,7 @@ passport.use(new GithubStrategy(
                     
                     user = new User({
                         githubId: profile.id,
-                        email: email.profile,
+                        email:profile._json.email,
                         username: profile.username,
                         password: hashedpassword,
                         admin: false
